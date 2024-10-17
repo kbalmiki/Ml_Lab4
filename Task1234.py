@@ -65,3 +65,17 @@ anti_aliasing=True)
 
 astro_image_rescaled = rescale(coin_grayscale, 0.75, anti_aliasing=False)
 astro_image_resized=resize(coin_grayscale, (image.shape[0] // 4, image.shape[1]// 4),anti_aliasing=True)
+
+
+#Task 4
+from skimage.exposure import histogram
+from skimage.util import img_as_ubyte
+
+grayscale = img_as_ubyte(coin_grayscale)
+hist, hist_centers = histogram(coin_grayscale)
+ax = plt.hist(grayscale.ravel(), bins = 256)
+t = 120
+binary = grayscale < t
+fig, ax = plt.subplots()
+plt.imshow(binary, cmap="gray")
+plt.show()
