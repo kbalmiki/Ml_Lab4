@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.feature import match_template
-from skimage import data, color, feature
 from skimage import io
 
 #Task 5
@@ -34,16 +33,48 @@ ax3.plot(x, y, 'o', markeredgecolor='r', markerfacecolor='none', markersize=10)
 plt.show()
 
 #Task 6
-template = image[170:220, 75:130]  # Coordinates to extract the template (a coin)
 
-# Perform template matching using match_template
-result = feature.match_template(image, template)
+# Own implementation of template matching algorithm using Sum of Squared Differences (SSD)
+def template_matching_ssd(image, template):
+    # Get the dimensions of the image and the template
+    image_h, image_w = image.shape
+    template_h, template_w = template.shape
 
-# Find the location of the best match
-ij = np.unravel_index(np.argmax(result), result.shape)  # Get the indices of the maximum match
+    # Initialize an empty result array to store SSD values
+    result = np.zeros((image_h - template_h + 1, image_w - template_w + 1))
+
+    # Slide the template across the image
+    for i in range(result.shape[0]):  # Height of the image region
+        for j in range(result.shape[1]):  # Width of the image region
+            # Extract the current region of the image
+            image_region = image[i:i + template_h, j:j + template_w]
+
+            # Compute the sum of squared differences (SSD) between the template and the region
+            ssd = np.sum((image_region - template) ** 2)
+
+            # Store the SSD in the result array
+            result[i, j] = ssd
+
+    # Since we're using SSD, the best match will be the minimum value
+    return result
+
+
+# Load the main image and the template
+# Already loaded the image in task 5
+
+# Let's take a small portion of the image as the template
+# This will be a coin from the image
+# Using coordinates to extract the template (a coin from task 5)
+template = coin
+
+# Step 4: Compute the result using the manual template matching function
+result = template_matching_ssd(image, template)
+
+# Step 5: Find the location of the best match (minimum SSD)
+ij = np.unravel_index(np.argmin(result), result.shape)  # Get the indices of the minimum SSD value
 x, y = ij[::-1]  # Reverse to get x, y coordinates
 
-#  Plot the result
+# Step 6: Plot the result
 fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 6))
 
 # Original image
@@ -60,8 +91,9 @@ ax2.axis('off')
 ax3.imshow(image, cmap=plt.cm.gray)
 ax3.set_title('Template Matching Result')
 # Draw a rectangle where the best match is found
-h, w = template.shape
-rect = plt.Rectangle((x, y), w, h, edgecolor='r', facecolor='none')
+# highlight matched region
+hcoin, wcoin = template.shape
+rect = plt.Rectangle((x, y), wcoin, hcoin, edgecolor='r', facecolor='none')
 ax3.add_patch(rect)
 ax3.axis('off')
 
